@@ -135,17 +135,27 @@ function showToast(message, isError = false) {
     toast.style.borderRadius = "5px";
     toast.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.1)";
     toast.style.fontSize = "16px";
-    toast.style.opacity = "1";
-    toast.style.transition = "opacity 0.5s ease-in-out";
     toast.style.maxWidth = "300px"; // Giới hạn chiều rộng
     toast.style.wordBreak = "break-word"; // Xuống dòng khi quá dài
+    toast.style.position = "relative";
+    toast.style.right = "-100%"; // Bắt đầu từ ngoài màn hình
+    toast.style.opacity = "0"; // Bắt đầu trong trạng thái ẩn
+    toast.style.transition = "right 0.5s ease-out, opacity 0.5s ease-out"; // Hiệu ứng trượt vào
 
-    // Thêm toast vào container (đẩy cái mới lên trên)
+    // Thêm toast vào container
     toastContainer.prepend(toast);
 
+    // Kích hoạt hiệu ứng sau một khoảng thời gian ngắn
     setTimeout(() => {
-        toast.style.opacity = "0"; // Làm mờ dần
-        setTimeout(() => toast.remove(), 500);
+        toast.style.right = "0"; // Trượt vào
+        toast.style.opacity = "1"; // Hiện rõ lên
+    }, 50);
+
+    // Ẩn thông báo sau 3 giây với hiệu ứng mờ dần & trượt ra
+    setTimeout(() => {
+        toast.style.right = "-100%"; // Trượt ra ngoài màn hình
+        toast.style.opacity = "0"; // Làm mờ
+        setTimeout(() => toast.remove(), 500); // Xóa khỏi DOM sau khi hoàn thành hiệu ứng
     }, 3000);
 }
     </script>
