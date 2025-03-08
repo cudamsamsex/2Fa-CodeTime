@@ -113,8 +113,8 @@ function showToast(message, isError = false) {
     const toast = document.createElement("div");
     toast.innerText = message;
     toast.style.position = "fixed";
-    toast.style.bottom = "20px";
-    toast.style.right = "20px";
+    toast.style.top = "20px"; // Đưa thông báo lên góc trên
+    toast.style.right = "20px"; // Căn phải
     toast.style.backgroundColor = isError ? "#e53e3e" : "#48bb78"; // Đỏ nếu lỗi, xanh nếu thành công
     toast.style.color = "#fff";
     toast.style.padding = "10px 20px";
@@ -122,10 +122,13 @@ function showToast(message, isError = false) {
     toast.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.1)";
     toast.style.fontSize = "16px";
     toast.style.zIndex = "1000";
+    toast.style.opacity = "1";
+    toast.style.transition = "opacity 0.5s ease-in-out";
+
     document.body.appendChild(toast);
 
     setTimeout(() => {
-        toast.style.opacity = "0";
+        toast.style.opacity = "0"; // Làm mờ dần
         setTimeout(() => toast.remove(), 500);
     }, 3000);
 }
