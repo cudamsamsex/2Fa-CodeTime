@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2FA Code Time</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { theme: { extend: {} } };
+        tailwind.config = { 
+            theme: { 
+                extend: {} 
+            } 
+        };
     </script>
 </head>
-<body class="bg-gray-100 flex justify-center items-center h-screen transition-colors duration-300">
+<body class="bg-gray-200 flex justify-center items-center h-screen transition-colors duration-300">
 
-    <div id="container" class="bg-white p-6 rounded-lg shadow-lg w-[500px] text-center relative transition-colors duration-300">
-        <button id="darkModeToggle" class="absolute top-2 right-2 bg-gray-200 text-black px-3 py-1 rounded hover:bg-gray-300">🌙</button>
-        <h1 id="title" class="text-3xl font-bold text-gray-800 mb-4 transition-colors duration-300">2FA Code Time</h1>
-        <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center text-gray-800 bg-white transition-colors duration-300" placeholder="Enter Secret Key" />
-        <h2 id="otpCode" class="text-3xl font-bold text-green-600 mb-2">------</h2>
-        <p id="countdown" class="text-gray-600 mb-4 transition-colors duration-300">Next code in: -- sec</p>
-        <button id="copyBtn" onclick="copyOTP()" class="bg-blue-200 text-black px-4 py-2 rounded w-full hover:bg-blue-300" disabled>
-    Copy Code </button>
+    <div id="container" class="bg-white p-8 rounded-xl shadow-2xl w-[550px] text-center relative transition-colors duration-300">
+        <button id="darkModeToggle" class="absolute top-3 right-3 bg-gray-300 text-black px-4 py-2 rounded-lg hover:bg-gray-400">🌙</button>
+        <h1 id="title" class="text-4xl font-extrabold text-gray-800 mb-6 transition-colors duration-300">2FA Code Time</h1>
+        <input type="text" id="secretKey" class="w-full p-3 border-2 border-gray-300 rounded-lg mb-6 text-center text-lg text-gray-800 bg-white transition-colors duration-300" placeholder="Enter Secret Key" />
+        <h2 id="otpCode" class="text-5xl font-bold text-green-600 mb-4">------</h2>
+        <p id="countdown" class="text-lg text-gray-600 mb-6 transition-colors duration-300">Next code in: -- sec</p>
+        <button id="copyBtn" onclick="copyOTP()" class="bg-blue-300 text-black text-lg px-6 py-3 rounded-lg w-full hover:bg-blue-400 transition-all duration-200 ease-in-out" disabled>
+            Copy Code
+        </button>
     </div>
 
     <script>
@@ -44,21 +49,26 @@
             interval = setInterval(() => updateOTP(secret), 1000);
         });
 
-        function base32ToBytes(base32) {
-            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-            let bits = "", bytes = [];
-            for (let char of base32) {
-                let val = alphabet.indexOf(char);
-                if (val === -1) continue;
-                bits += val.toString(2).padStart(5, "0");
-            }
-            for (let i = 0; i + 8 <= bits.length; i += 8) {
-                bytes.push(parseInt(bits.substring(i, i + 8), 2));
-            }
-            return new Uint8Array(bytes);
+        function updateCountdown() {
+            const timeRemaining = 30 - (Math.floor(Date.now() / 1000) % 30);
+            document.getElementById("countdown").innerText = "Next code in: " + timeRemaining + " sec";
         }
 
         async function generateTOTP(secret) {
+            function base32ToBytes(base32) {
+                const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+                let bits = "", bytes = [];
+                for (let char of base32) {
+                    let val = alphabet.indexOf(char);
+                    if (val === -1) continue;
+                    bits += val.toString(2).padStart(5, "0");
+                }
+                for (let i = 0; i + 8 <= bits.length; i += 8) {
+                    bytes.push(parseInt(bits.substring(i, i + 8), 2));
+                }
+                return new Uint8Array(bytes);
+            }
+
             let keyBytes = base32ToBytes(secret);
             let epoch = Math.floor(Date.now() / 1000);
             let time = Math.floor(epoch / 30);
@@ -82,7 +92,6 @@
             try {
                 const otp = await generateTOTP(secret);
                 document.getElementById("otpCode").innerText = otp;
-                document.getElementById("otpCode").classList.remove("text-red-500");
                 document.getElementById("copyBtn").disabled = false;
                 updateCountdown();
             } catch (error) {
@@ -92,72 +101,59 @@
             }
         }
 
-        function updateCountdown() {
-    const timeRemaining = 30 - (Math.floor(Date.now() / 1000) % 30);
-    document.getElementById("countdown").innerText = "Next code in: " + timeRemaining + " sec";
-}
+        function copyOTP() {
+            const otpText = document.getElementById("otpCode").innerText.trim();
+            if (otpText && otpText !== "------") {
+                navigator.clipboard.writeText(otpText).then(() => {
+                    showToast("Code Copy Successfully!");
+                }).catch(() => {
+                    showToast("Failed to copy Code!", true);
+                });
+            } else {
+                showToast("No Code available to copy!", true);
+            }
+        }
 
-function copyOTP() {
-    const otpText = document.getElementById("otpCode").innerText.trim();
-    if (otpText && otpText !== "------") {
-        navigator.clipboard.writeText(otpText).then(() => {
-            showToast("Code Copy Successfully!");
-        }).catch(() => {
-            showToast("Failed to copy Code!", true);
-        });
-    } else {
-        showToast("No Code available to copy!", true);
-    }
-}
+        function showToast(message, isError = false) {
+            let toastContainer = document.getElementById("toastContainer");
+            if (!toastContainer) {
+                toastContainer = document.createElement("div");
+                toastContainer.id = "toastContainer";
+                toastContainer.style.position = "fixed";
+                toastContainer.style.top = "20px";
+                toastContainer.style.right = "20px";
+                toastContainer.style.display = "flex";
+                toastContainer.style.flexDirection = "column";
+                toastContainer.style.gap = "10px";
+                toastContainer.style.zIndex = "1000";
+                document.body.appendChild(toastContainer);
+            }
 
-function showToast(message, isError = false) {
-    let toastContainer = document.getElementById("toastContainer");
+            const toast = document.createElement("div");
+            toast.innerText = message;
+            toast.style.backgroundColor = isError ? "#e53e3e" : "#48bb78";
+            toast.style.color = "#fff";
+            toast.style.padding = "15px 25px";
+            toast.style.borderRadius = "10px";
+            toast.style.fontSize = "18px";
+            toast.style.maxWidth = "350px";
+            toast.style.right = "-100%";
+            toast.style.opacity = "0";
+            toast.style.transition = "right 0.5s ease-out, opacity 0.5s ease-out";
 
-    // Nếu chưa có container, tạo mới
-    if (!toastContainer) {
-        toastContainer = document.createElement("div");
-        toastContainer.id = "toastContainer";
-        toastContainer.style.position = "fixed";
-        toastContainer.style.top = "20px";
-        toastContainer.style.right = "20px";
-        toastContainer.style.display = "flex";
-        toastContainer.style.flexDirection = "column";
-        toastContainer.style.gap = "10px"; // Khoảng cách giữa các thông báo
-        toastContainer.style.zIndex = "1000";
-        document.body.appendChild(toastContainer);
-    }
+            toastContainer.prepend(toast);
 
-    const toast = document.createElement("div");
-    toast.innerText = message;
-    toast.style.backgroundColor = isError ? "#e53e3e" : "#48bb78"; // Đỏ nếu lỗi, xanh nếu thành công
-    toast.style.color = "#fff";
-    toast.style.padding = "10px 20px";
-    toast.style.borderRadius = "5px";
-    toast.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.1)";
-    toast.style.fontSize = "16px";
-    toast.style.maxWidth = "300px"; // Giới hạn chiều rộng
-    toast.style.wordBreak = "break-word"; // Xuống dòng khi quá dài
-    toast.style.position = "relative";
-    toast.style.right = "-100%"; // Bắt đầu từ ngoài màn hình
-    toast.style.opacity = "0"; // Bắt đầu trong trạng thái ẩn
-    toast.style.transition = "right 0.5s ease-out, opacity 0.5s ease-out"; // Hiệu ứng trượt vào
+            setTimeout(() => {
+                toast.style.right = "0";
+                toast.style.opacity = "1";
+            }, 50);
 
-    // Thêm toast vào container
-    toastContainer.prepend(toast);
-
-    // Kích hoạt hiệu ứng sau một khoảng thời gian ngắn
-    setTimeout(() => {
-        toast.style.right = "0"; // Trượt vào
-        toast.style.opacity = "1"; // Hiện rõ lên
-    }, 50);
-
-    // Ẩn thông báo sau 3 giây với hiệu ứng mờ dần & trượt ra
-    setTimeout(() => {
-        toast.style.right = "-100%"; // Trượt ra ngoài màn hình
-        toast.style.opacity = "0"; // Làm mờ
-        setTimeout(() => toast.remove(), 500); // Xóa khỏi DOM sau khi hoàn thành hiệu ứng
-    }, 3000);
-}
+            setTimeout(() => {
+                toast.style.right = "-100%";
+                toast.style.opacity = "0";
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
     </script>
 </body>
 </html>
