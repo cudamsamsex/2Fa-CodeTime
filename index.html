@@ -7,15 +7,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 flex justify-center items-center h-screen">
+<body class="bg-gray-100 dark:bg-gray-900 flex justify-center items-center h-screen transition-colors">
 
-    <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4">2FA Code Generator</h1>
-        <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center" placeholder="Click Here To Enter The 2FA Key" />
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96 text-center">
+        <div class="flex justify-between items-center mb-4">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">2FA Code Generator</h1>
+            <button id="darkModeToggle" class="text-gray-600 dark:text-gray-300">🌙</button>
+        </div>
+        <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center dark:bg-gray-700 dark:text-white" placeholder="Enter 2FA Key" />
         <button onclick="start2FA()" class="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2 hover:bg-blue-600">Get Code</button>
         <h2 id="otpCode" class="text-3xl font-bold text-green-600 mb-2">------</h2>
-        <p id="countdown" class="text-gray-600 mb-4">Refreshing in: -- sec</p>
-        <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 text-black px-4 py-2 rounded w-full hover:bg-gray-400" disabled>Copy Code</button>
+        <p id="countdown" class="text-gray-600 dark:text-gray-300 mb-4">Refreshing in: -- sec</p>
+        <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 dark:bg-gray-600 text-black dark:text-white px-4 py-2 rounded w-full hover:bg-gray-400 dark:hover:bg-gray-700" disabled>Copy Code</button>
     </div>
 
     <script>
@@ -105,6 +108,32 @@
             } else {
                 alert("No OTP available to copy!");
             }
+        }
+
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+
+        function applyDarkMode(enabled) {
+            if (enabled) {
+                body.classList.add("dark");
+                localStorage.setItem("darkMode", "enabled");
+                darkModeToggle.textContent = "☀️";
+            } else {
+                body.classList.remove("dark");
+                localStorage.setItem("darkMode", "disabled");
+                darkModeToggle.textContent = "🌙";
+            }
+        }
+
+        darkModeToggle.addEventListener("click", () => {
+            const isDarkMode = body.classList.contains("dark");
+            applyDarkMode(!isDarkMode);
+        });
+
+        // Check user preference
+        if (localStorage.getItem("darkMode") === "enabled" || window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            applyDarkMode(true);
         }
     </script>
 
