@@ -5,26 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2FA Code Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
-        input, button { padding: 10px; margin: 5px; }
-        input { width: 300px; }
-        button { cursor: pointer; }
-        h2 { color: green; }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 flex justify-center items-center h-screen">
 
-    <h1>2FA Code Generator</h1>
-    <p>Enter your Secret Key to generate a 2FA code:</p>
-    
-    <input type="text" id="secretKey" placeholder="Enter Secret Key (Base32)" />
-    <br>
-    <button onclick="start2FA()">Generate 2FA Code</button>
-    <button onclick="copyOTP()">Copy OTP</button>
-
-    <h2 id="otpCode">OTP Code: --</h2>
-    <p id="countdown">Code refreshes in: -- seconds</p>
+    <div class="bg-white p-6 rounded-lg shadow-lg w-96 text-center">
+        <h1 class="text-2xl font-bold text-gray-800 mb-4">2FA Code Generator</h1>
+        <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center" placeholder="Enter Secret Key (Base32)" />
+        <button onclick="start2FA()" class="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2 hover:bg-blue-600">Generate OTP</button>
+        <h2 id="otpCode" class="text-3xl font-bold text-green-600 mb-2">------</h2>
+        <p id="countdown" class="text-gray-600 mb-4">Refreshing in: -- sec</p>
+        <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 text-black px-4 py-2 rounded w-full hover:bg-gray-400" disabled>Copy OTP</button>
+    </div>
 
     <script>
         let interval;
@@ -88,23 +80,28 @@
         async function updateOTP(secret) {
             try {
                 const otp = await generateTOTP(secret);
-                document.getElementById("otpCode").innerText = "OTP Code: " + otp;
+                document.getElementById("otpCode").innerText = otp;
+                document.getElementById("copyBtn").disabled = false;
                 updateCountdown();
             } catch (error) {
-                document.getElementById("otpCode").innerText = "Error: " + error.message;
+                document.getElementById("otpCode").innerText = "Error!";
+                document.getElementById("copyBtn").disabled = true;
             }
         }
 
         function updateCountdown() {
             const timeRemaining = 30 - (Math.floor(Date.now() / 1000) % 30);
-            document.getElementById("countdown").innerText = "Code refreshes in: " + timeRemaining + " seconds";
+            document.getElementById("countdown").innerText = "Refreshing in: " + timeRemaining + " sec";
         }
 
         function copyOTP() {
-            const otpText = document.getElementById("otpCode").innerText.replace("OTP Code: ", "").trim();
-            if (otpText && otpText !== "--") {
-                navigator.clipboard.writeText(otpText);
-                alert("OTP copied to clipboard!");
+            const otpText = document.getElementById("otpCode").innerText.trim();
+            if (otpText && otpText !== "------") {
+                navigator.clipboard.writeText(otpText).then(() => {
+                    alert("OTP copied to clipboard!");
+                }).catch(() => {
+                    alert("Failed to copy OTP!");
+                });
             } else {
                 alert("No OTP available to copy!");
             }
