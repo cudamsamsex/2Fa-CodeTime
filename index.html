@@ -14,6 +14,11 @@
 </head>
 <body class="bg-gray-100 text-gray-900 flex justify-center items-center min-h-screen transition-colors dark:bg-gray-900 dark:text-white">
 
+    <!-- Nút Dark Mode -->
+    <button id="darkModeToggle" class="absolute top-4 right-4 text-2xl p-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+        🌙
+    </button>
+
     <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-[450px] text-center">
         <h1 class="text-3xl font-bold mb-6">2FA Code Generator</h1>
 
@@ -116,6 +121,31 @@
                 alert("No OTP available to copy!");
             }
         }
+
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+
+        function updateDarkMode() {
+            if (localStorage.getItem("darkMode") === "enabled") {
+                body.classList.add("dark");
+                darkModeToggle.innerText = "☀️";
+            } else {
+                body.classList.remove("dark");
+                darkModeToggle.innerText = "🌙";
+            }
+        }
+
+        darkModeToggle.addEventListener("click", () => {
+            if (localStorage.getItem("darkMode") === "enabled") {
+                localStorage.setItem("darkMode", "disabled");
+            } else {
+                localStorage.setItem("darkMode", "enabled");
+            }
+            updateDarkMode();
+        });
+
+        updateDarkMode();
     </script>
 
 </body>
