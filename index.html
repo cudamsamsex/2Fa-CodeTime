@@ -26,14 +26,15 @@
 
     <script>
         function start2FA() {
-            const secret = document.getElementById("secretKey").value.trim();
+            let secret = document.getElementById("secretKey").value.trim();
             if (!secret) {
                 alert("Vui lòng nhập Secret Key!");
                 return;
             }
 
             try {
-                otplib.authenticator.options = { step: 30 }; // Đảm bảo chuẩn RFC 6238
+                secret = otplib.authenticator.utils.encodeKey(secret); // Chuẩn hóa key
+                otplib.authenticator.options = { step: 30 };
                 updateOTP(secret);
                 setInterval(() => updateOTP(secret), 1000);
             } catch (error) {
