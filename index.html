@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trình tạo mã 2FA</title>
-    <script src="https://cdn.jsdelivr.net/npm/otplib@12.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/speakeasy@2.0.0"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
         input { padding: 10px; width: 300px; margin-bottom: 10px; }
@@ -25,8 +25,8 @@
     <p id="countdown">Mã cập nhật sau: -- giây</p>
 
     <script>
-        let interval; // Lưu trạng thái interval để tránh lặp nhiều lần
-        
+        let interval;
+
         function start2FA() {
             let secret = document.getElementById("secretKey").value.trim();
             if (!secret) {
@@ -34,25 +34,19 @@
                 return;
             }
 
-            try {
-                otplib.authenticator.options = { step: 30 };
+            if (interval) clearInterval(interval);
 
-                // Xóa interval cũ nếu có
-                if (interval) clearInterval(interval);
-
-                // Cập nhật mã lần đầu
-                updateOTP(secret);
-
-                // Cập nhật mỗi giây
-                interval = setInterval(() => updateOTP(secret), 1000);
-            } catch (error) {
-                alert("Lỗi: Secret Key không hợp lệ!");
-            }
+            updateOTP(secret);
+            interval = setInterval(() => updateOTP(secret), 1000);
         }
 
         function updateOTP(secret) {
             try {
-                const otp = otplib.authenticator.generate(secret);
+                const otp = speakeasy.totp({
+                    secret: secret,
+                    encoding: "base32"
+                });
+
                 document.getElementById("otpCode").innerText = "Mã OTP: " + otp;
                 updateCountdown();
             } catch (error) {
