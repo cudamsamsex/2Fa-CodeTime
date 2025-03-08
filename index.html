@@ -15,7 +15,6 @@
         <button id="darkModeToggle" class="absolute top-2 right-2 bg-gray-200 text-black px-3 py-1 rounded hover:bg-gray-300">🌙</button>
         <h1 id="title" class="text-3xl font-bold text-gray-800 mb-4 transition-colors duration-300">2FA Code Generator</h1>
         <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center text-gray-800 bg-white transition-colors duration-300" placeholder="Enter Secret Key (Base32)" />
-        <button onclick="start2FA()" class="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2 hover:bg-blue-600">Generate OTP</button>
         <h2 id="otpCode" class="text-3xl font-bold text-green-600 mb-2">------</h2>
         <p id="countdown" class="text-gray-600 mb-4 transition-colors duration-300">Refreshing in: -- sec</p>
         <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 text-black px-4 py-2 rounded w-full hover:bg-gray-400" disabled>Copy OTP</button>
@@ -36,24 +35,20 @@
             document.getElementById("darkModeToggle").innerText = darkMode ? "☀️" : "🌙";
         });
 
-        function start2FA() {
+        document.getElementById("secretKey").addEventListener("input", () => {
             let secret = document.getElementById("secretKey").value.trim().replace(/\s+/g, "").toUpperCase();
 
-            if (!secret) {
-                alert("Please enter a Secret Key!");
-                return;
+            if (/^[A-Z2-7]+$/.test(secret)) {
+                if (interval) clearInterval(interval);
+                updateOTP(secret);
+                interval = setInterval(() => updateOTP(secret), 1000);
+            } else {
+                document.getElementById("otpCode").innerText = "Invalid Key!";
+                document.getElementById("otpCode").classList.add("text-red-500");
+                document.getElementById("copyBtn").disabled = true;
+                clearInterval(interval);
             }
-
-            if (!/^[A-Z2-7]+$/.test(secret)) {
-                alert("Secret Key must be in Base32 format!");
-                return;
-            }
-
-            if (interval) clearInterval(interval);
-
-            updateOTP(secret);
-            interval = setInterval(() => updateOTP(secret), 1000);
-        }
+        });
 
         function base32ToBytes(base32) {
             const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
