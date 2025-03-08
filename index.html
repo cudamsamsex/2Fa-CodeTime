@@ -14,14 +14,21 @@
 </head>
 <body class="bg-gray-100 text-gray-900 flex justify-center items-center h-screen transition-colors dark:bg-gray-900 dark:text-white">
 
-    <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[400px] text-center relative">
-        <button id="darkModeToggle" class="absolute top-4 right-4 text-gray-600 dark:text-gray-300">🌙</button>
-        <h1 class="text-3xl font-bold mb-6">2FA Code Generator</h1>
-        <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center dark:bg-gray-700 dark:text-white" placeholder="Enter 2FA Key" />
-        <button onclick="start2FA()" class="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2 hover:bg-blue-600">Get Code</button>
-        <h2 id="otpCode" class="text-4xl font-bold text-green-600 mb-2">------</h2>
-        <p id="countdown" class="text-gray-600 dark:text-gray-300 mb-4">Refreshing in: -- sec</p>
-        <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 dark:bg-gray-600 text-black dark:text-white px-4 py-2 rounded w-full hover:bg-gray-400 dark:hover:bg-gray-700" disabled>Copy Code</button>
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[450px] text-center relative">
+        <!-- Biểu tượng Dark Mode ở góc phải trên cùng -->
+        <button id="darkModeToggle" class="absolute top-4 right-4 text-gray-600 dark:text-gray-300 text-2xl">🌙</button>
+
+        <!-- Tiêu đề nằm giữa và lớn hơn -->
+        <h1 class="text-4xl font-bold mb-6">2FA Code Generator</h1>
+
+        <input type="text" id="secretKey" class="w-full p-3 border rounded mb-4 text-center dark:bg-gray-700 dark:text-white text-lg" placeholder="Enter 2FA Key" />
+        <button onclick="start2FA()" class="bg-blue-500 text-white px-4 py-3 rounded w-full mb-3 text-lg hover:bg-blue-600">Get Code</button>
+        
+        <!-- Mã OTP lớn hơn -->
+        <h2 id="otpCode" class="text-5xl font-bold text-green-600 mb-3">------</h2>
+        <p id="countdown" class="text-gray-600 dark:text-gray-300 mb-4 text-lg">Refreshing in: -- sec</p>
+        
+        <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 dark:bg-gray-600 text-black dark:text-white px-4 py-3 rounded w-full text-lg hover:bg-gray-400 dark:hover:bg-gray-700" disabled>Copy Code</button>
     </div>
 
     <script>
