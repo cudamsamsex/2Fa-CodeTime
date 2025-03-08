@@ -37,61 +37,42 @@
 
         document.getElementById("secretKey").addEventListener("input", () => {
             let secret = document.getElementById("secretKey").value.trim().replace(/\s+/g, "").toUpperCase();
-
-            if (/^[A-Z2-7]+$/.test(secret) && secret.length >= 16) {
-                if (interval) clearInterval(interval);
-                updateOTP(secret);
-                interval = setInterval(() => updateOTP(secret), 1000);
-            } else {
-                document.getElementById("otpCode").innerText = "Invalid Key!";
-                document.getElementById("otpCode").classList.add("text-red-500");
-                document.getElementById("copyBtn").disabled = true;
-                clearInterval(interval);
-            }
+            if (interval) clearInterval(interval);
+            updateOTP(secret);
+            interval = setInterval(() => updateOTP(secret), 1000);
         });
 
         function base32ToBytes(base32) {
             const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
             let bits = "", bytes = [];
-
             for (let char of base32) {
                 let val = alphabet.indexOf(char);
-                if (val === -1) return null;
+                if (val === -1) continue;
                 bits += val.toString(2).padStart(5, "0");
             }
-
             for (let i = 0; i + 8 <= bits.length; i += 8) {
                 bytes.push(parseInt(bits.substring(i, i + 8), 2));
             }
-
             return new Uint8Array(bytes);
         }
 
         async function generateTOTP(secret) {
             let keyBytes = base32ToBytes(secret);
-            if (!keyBytes || keyBytes.length < 10) throw new Error("Invalid Base32 encoding");
-
             let epoch = Math.floor(Date.now() / 1000);
             let time = Math.floor(epoch / 30);
             let timeBuffer = new ArrayBuffer(8);
             let timeView = new DataView(timeBuffer);
-
             for (let i = 7; i >= 0; i--) {
                 timeView.setUint8(i, time & 0xff);
                 time >>= 8;
             }
-
-            let cryptoKey = await window.crypto.subtle.importKey(
-                "raw", keyBytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]
-            );
-
+            let cryptoKey = await window.crypto.subtle.importKey("raw", keyBytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]);
             let hmac = new Uint8Array(await window.crypto.subtle.sign("HMAC", cryptoKey, timeBuffer));
             let offset = hmac[hmac.length - 1] & 0x0f;
             let otp = ((hmac[offset] & 0x7f) << 24 |
                        (hmac[offset + 1] & 0xff) << 16 |
                        (hmac[offset + 2] & 0xff) << 8 |
                        (hmac[offset + 3] & 0xff)) % 1000000;
-
             return otp.toString().padStart(6, "0");
         }
 
@@ -103,8 +84,7 @@
                 document.getElementById("copyBtn").disabled = false;
                 updateCountdown();
             } catch (error) {
-                document.getElementById("otpCode").innerText = "Invalid Key!";
-                document.getElementById("otpCode").classList.add("text-red-500");
+                document.getElementById("otpCode").innerText = "------";
                 document.getElementById("copyBtn").disabled = true;
                 clearInterval(interval);
             }
