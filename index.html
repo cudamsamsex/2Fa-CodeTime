@@ -4,7 +4,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2FA Code Generator</title>
+    <title>2FA Code Time</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { theme: { extend: {} } };
@@ -14,11 +14,11 @@
 
     <div id="container" class="bg-white p-6 rounded-lg shadow-lg w-[500px] text-center relative transition-colors duration-300">
         <button id="darkModeToggle" class="absolute top-2 right-2 bg-gray-200 text-black px-3 py-1 rounded hover:bg-gray-300">🌙</button>
-        <h1 id="title" class="text-3xl font-bold text-gray-800 mb-4 transition-colors duration-300">2FA Code Generator</h1>
-        <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center text-gray-800 bg-white transition-colors duration-300" placeholder="Enter Secret Key (Base32)" />
+        <h1 id="title" class="text-3xl font-bold text-gray-800 mb-4 transition-colors duration-300">2FA Code Time</h1>
+        <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center text-gray-800 bg-white transition-colors duration-300" placeholder="Enter Secret Key" />
         <h2 id="otpCode" class="text-3xl font-bold text-green-600 mb-2">------</h2>
-        <p id="countdown" class="text-gray-600 mb-4 transition-colors duration-300">Refreshing in: -- sec</p>
-        <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 text-black px-4 py-2 rounded w-full hover:bg-gray-400" disabled>Copy OTP</button>
+        <p id="countdown" class="text-gray-600 mb-4 transition-colors duration-300">Next code in: -- sec</p>
+        <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 text-black px-4 py-2 rounded w-full hover:bg-gray-400" disabled>Copy Code</button>
     </div>
 
     <script>
@@ -93,7 +93,7 @@
 
         function updateCountdown() {
             const timeRemaining = 30 - (Math.floor(Date.now() / 1000) % 30);
-            document.getElementById("countdown").innerText = "Refreshing in: " + timeRemaining + " sec";
+            document.getElementById("countdown").innerText = "Next code in: " + timeRemaining + " sec";
         }
 
         function copyOTP() {
@@ -102,7 +102,7 @@
                 navigator.clipboard.writeText(otpText).then(() => {
                     alert("OTP copied to clipboard!");
                 }).catch(() => {
-                    alert("Failed to copy OTP!");
+                    alert("Failed to copy Code!");
                 });
             } else {
                 alert("No OTP available to copy!");
