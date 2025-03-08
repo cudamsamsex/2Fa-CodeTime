@@ -14,7 +14,7 @@
         <input type="text" id="secretKey" class="w-full p-3 border-2 border-gray-300 rounded-lg mb-6 text-center text-lg bg-white" placeholder="Enter Secret Key" />
         <h2 id="otpCode" class="text-5xl font-bold text-green-600 mb-4">------</h2>
         <p id="countdown" class="text-lg text-gray-600 mb-6">Next code in: -- sec</p>
-        <button id="copyBtn" onclick="copyOTP()" class="bg-blue-300 text-black text-lg px-6 py-3 rounded-lg w-full hover:bg-blue-400" disabled>Copy Code</button>
+        <button id="copyBtn" onclick="copyOTP()" class="bg-blue-300 text-black text-lg px-6 py-3 rounded-lg w-full hover:bg-blue-400">Copy Code</button>
     </div>
 
     <script>
@@ -42,7 +42,6 @@
             let secret = document.getElementById("secretKey").value.trim().replace(/\s+/g, "").toUpperCase();
             if (!/^[A-Z2-7]+$/.test(secret)) {
                 document.getElementById("otpCode").innerText = "Invalid Key";
-                document.getElementById("copyBtn").disabled = true;
                 return;
             }
             if (interval) clearInterval(interval);
