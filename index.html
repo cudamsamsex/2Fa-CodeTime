@@ -7,27 +7,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 flex justify-center items-center h-screen">
+<body class="bg-gray-100 flex justify-center items-center h-screen transition-colors duration-300">
 
-    <div id="container" class="bg-white p-6 rounded-lg shadow-lg w-[500px] text-center relative">
+    <div id="container" class="bg-white p-6 rounded-lg shadow-lg w-[500px] text-center relative transition-colors duration-300">
         <button id="darkModeToggle" class="absolute top-2 right-2 bg-gray-200 text-black px-3 py-1 rounded hover:bg-gray-300">🌙</button>
-        <h1 id="title" class="text-3xl font-bold text-gray-800 mb-4">2FA Code Generator</h1>
-        <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center" placeholder="Enter Secret Key (Base32)" />
+        <h1 id="title" class="text-3xl font-bold text-gray-800 mb-4 transition-colors duration-300">2FA Code Generator</h1>
+        <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center transition-colors duration-300" placeholder="Enter Secret Key (Base32)" />
         <button onclick="start2FA()" class="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2 hover:bg-blue-600">Generate OTP</button>
         <h2 id="otpCode" class="text-3xl font-bold text-green-600 mb-2">------</h2>
-        <p id="countdown" class="text-gray-600 mb-4">Refreshing in: -- sec</p>
+        <p id="countdown" class="text-gray-600 mb-4 transition-colors duration-300">Refreshing in: -- sec</p>
         <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 text-black px-4 py-2 rounded w-full hover:bg-gray-400" disabled>Copy OTP</button>
     </div>
 
     <script>
         let interval;
+        let darkMode = false;
 
         document.getElementById("darkModeToggle").addEventListener("click", () => {
-            document.body.classList.toggle("bg-gray-900");
-            document.body.classList.toggle("text-white");
-            document.getElementById("container").classList.toggle("bg-gray-800");
-            document.getElementById("container").classList.toggle("text-white");
-            document.getElementById("title").classList.toggle("text-white");
+            darkMode = !darkMode;
+            document.body.classList.toggle("bg-gray-900", darkMode);
+            document.body.classList.toggle("text-white", darkMode);
+            document.getElementById("container").classList.toggle("bg-gray-800", darkMode);
+            document.getElementById("container").classList.toggle("text-white", darkMode);
+            document.getElementById("title").classList.toggle("text-white", darkMode);
+            document.getElementById("countdown").classList.toggle("text-gray-400", darkMode);
+            document.getElementById("darkModeToggle").innerText = darkMode ? "☀️" : "🌙";
         });
 
         function start2FA() {
