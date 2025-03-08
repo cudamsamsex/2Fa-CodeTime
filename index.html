@@ -122,31 +122,53 @@
         }
 
         function showToast(message, isError = false) {
-            let toastContainer = document.getElementById("toastContainer");
-            if (!toastContainer) {
-                toastContainer = document.createElement("div");
-                toastContainer.id = "toastContainer";
-                toastContainer.style.position = "fixed";
-                toastContainer.style.top = "20px";
-                toastContainer.style.right = "20px";
-                toastContainer.style.zIndex = "1000";
-                document.body.appendChild(toastContainer);
-            }
+    let toastContainer = document.getElementById("toastContainer");
 
-            const toast = document.createElement("div");
-            toast.innerText = message;
-            toast.style.backgroundColor = isError ? "#e53e3e" : "#48bb78";
-            toast.style.color = "#fff";
-            toast.style.padding = "10px 20px";
-            toast.style.borderRadius = "5px";
-            toast.style.marginBottom = "10px";
-            toast.style.transition = "opacity 0.5s";
-            toastContainer.prepend(toast);
+    // Nếu chưa có container, tạo mới
+    if (!toastContainer) {
+        toastContainer = document.createElement("div");
+        toastContainer.id = "toastContainer";
+        toastContainer.style.position = "fixed";
+        toastContainer.style.top = "20px";
+        toastContainer.style.right = "20px";
+        toastContainer.style.display = "flex";
+        toastContainer.style.flexDirection = "column";
+        toastContainer.style.gap = "10px"; // Khoảng cách giữa các thông báo
+        toastContainer.style.zIndex = "1000";
+        document.body.appendChild(toastContainer);
+    }
 
-            setTimeout(() => {
-                toast.style.opacity = "0";
-                setTimeout(() => toast.remove(), 500);
-            }, 3000);
+
+    const toast = document.createElement("div");
+    toast.innerText = message;
+    toast.style.backgroundColor = isError ? "#e53e3e" : "#48bb78"; // Đỏ nếu lỗi, xanh nếu thành công
+    toast.style.color = "#fff";
+    toast.style.padding = "10px 20px";
+    toast.style.borderRadius = "5px";
+    toast.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.1)";
+    toast.style.fontSize = "16px";
+    toast.style.maxWidth = "300px"; // Giới hạn chiều rộng
+    toast.style.wordBreak = "break-word"; // Xuống dòng khi quá dài
+    toast.style.position = "relative";
+    toast.style.right = "-100%"; // Bắt đầu từ ngoài màn hình
+    toast.style.opacity = "0"; // Bắt đầu trong trạng thái ẩn
+    toast.style.transition = "right 0.5s ease-out, opacity 0.5s ease-out"; // Hiệu ứng trượt vào
+
+    // Thêm toast vào container
+    toastContainer.prepend(toast);
+
+    // Kích hoạt hiệu ứng sau một khoảng thời gian ngắn
+    setTimeout(() => {
+        toast.style.right = "0"; // Trượt vào
+        toast.style.opacity = "1"; // Hiện rõ lên
+    }, 50);
+
+    // Ẩn thông báo sau 3 giây với hiệu ứng mờ dần & trượt ra
+    setTimeout(() => {
+        toast.style.right = "-100%"; // Trượt ra ngoài màn hình
+        toast.style.opacity = "0"; // Làm mờ
+        setTimeout(() => toast.remove(), 500); // Xóa khỏi DOM sau khi hoàn thành hiệu ứng
+    }, 3000);
         }
     </script>
 </body>
