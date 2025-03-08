@@ -38,7 +38,7 @@
         document.getElementById("secretKey").addEventListener("input", () => {
             let secret = document.getElementById("secretKey").value.trim().replace(/\s+/g, "").toUpperCase();
 
-            if (/^[A-Z2-7]+$/.test(secret)) {
+            if (/^[A-Z2-7]+$/.test(secret) && secret.length >= 16) {
                 if (interval) clearInterval(interval);
                 updateOTP(secret);
                 interval = setInterval(() => updateOTP(secret), 1000);
@@ -69,7 +69,7 @@
 
         async function generateTOTP(secret) {
             let keyBytes = base32ToBytes(secret);
-            if (!keyBytes) throw new Error("Invalid Base32 encoding");
+            if (!keyBytes || keyBytes.length < 10) throw new Error("Invalid Base32 encoding");
 
             let epoch = Math.floor(Date.now() / 1000);
             let time = Math.floor(epoch / 30);
