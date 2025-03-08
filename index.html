@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trình tạo mã 2FA</title>
-    <script src="https://cdn.jsdelivr.net/npm/speakeasy@2.0.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
         input { padding: 10px; width: 300px; margin-bottom: 10px; }
@@ -28,9 +28,10 @@
         let interval;
 
         function start2FA() {
-            let secret = document.getElementById("secretKey").value.trim();
-            if (!secret) {
-                alert("Vui lòng nhập Secret Key!");
+            let secret = document.getElementById("secretKey").value.trim().replace(/\s+/g, "").toUpperCase();
+
+            if (!/^[A-Z2-7]+$/.test(secret)) {
+                alert("Secret Key phải ở định dạng Base32!");
                 return;
             }
 
@@ -40,23 +41,57 @@
             interval = setInterval(() => updateOTP(secret), 1000);
         }
 
-       function updateOTP(secret) {
-    try {
-        if (!/^[A-Z2-7]+$/.test(secret.replace(/\s/g, '').toUpperCase())) {
-            throw new Error("Secret Key phải ở định dạng Base32!");
+        function base32ToBytes(base32) {
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+            let bits = "", bytes = [];
+
+            for (let char of base32) {
+                let val = alphabet.indexOf(char);
+                bits += val.toString(2).padStart(5, "0");
+            }
+
+            for (let i = 0; i + 8 <= bits.length; i += 8) {
+                bytes.push(parseInt(bits.substring(i, i + 8), 2));
+            }
+
+            return new Uint8Array(bytes);
         }
 
-        const otp = speakeasy.totp({
-            secret: secret.replace(/\s/g, '').toUpperCase(), // Chuẩn hóa Secret Key
-            encoding: "base32"
-        });
+        async function generateTOTP(secret) {
+            let keyBytes = base32ToBytes(secret);
+            let epoch = Math.floor(Date.now() / 1000);
+            let time = Math.floor(epoch / 30);
+            let timeBuffer = new ArrayBuffer(8);
+            let timeView = new DataView(timeBuffer);
 
-        document.getElementById("otpCode").innerText = "Mã OTP: " + otp;
-        updateCountdown();
-    } catch (error) {
-        document.getElementById("otpCode").innerText = "Lỗi: " + error.message;
-    }
-}
+            for (let i = 7; i >= 0; i--) {
+                timeView.setUint8(i, time & 0xff);
+                time >>= 8;
+            }
+
+            let cryptoKey = await window.crypto.subtle.importKey(
+                "raw", keyBytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]
+            );
+
+            let hmac = new Uint8Array(await window.crypto.subtle.sign("HMAC", cryptoKey, timeBuffer));
+            let offset = hmac[hmac.length - 1] & 0x0f;
+            let otp = ((hmac[offset] & 0x7f) << 24 |
+                       (hmac[offset + 1] & 0xff) << 16 |
+                       (hmac[offset + 2] & 0xff) << 8 |
+                       (hmac[offset + 3] & 0xff)) % 1000000;
+
+            return otp.toString().padStart(6, "0");
+        }
+
+        async function updateOTP(secret) {
+            try {
+                const otp = await generateTOTP(secret);
+                document.getElementById("otpCode").innerText = "Mã OTP: " + otp;
+                updateCountdown();
+            } catch (error) {
+                document.getElementById("otpCode").innerText = "Lỗi: " + error.message;
+            }
+        }
 
         function updateCountdown() {
             const timeRemaining = 30 - (Math.floor(Date.now() / 1000) % 30);
