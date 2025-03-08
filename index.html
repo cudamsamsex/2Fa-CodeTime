@@ -12,18 +12,20 @@
         };
     </script>
 </head>
-<body class="bg-gray-100 text-gray-900 flex justify-center items-center h-screen transition-colors dark:bg-gray-900 dark:text-white">
+<body class="bg-gray-100 text-gray-900 flex justify-center items-center min-h-screen transition-colors dark:bg-gray-900 dark:text-white">
 
-    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96 text-center">
-        <div class="flex justify-between items-center mb-4">
-            <h1 class="text-2xl font-bold">2FA Code Generator</h1>
-            <button id="darkModeToggle" class="text-gray-600 dark:text-gray-300">🌙</button>
-        </div>
-        <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center dark:bg-gray-700 dark:text-white" placeholder="Enter 2FA Key" />
-        <button onclick="start2FA()" class="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2 hover:bg-blue-600">Get Code</button>
-        <h2 id="otpCode" class="text-3xl font-bold text-green-600 mb-2">------</h2>
-        <p id="countdown" class="text-gray-600 dark:text-gray-300 mb-4">Refreshing in: -- sec</p>
-        <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 dark:bg-gray-600 text-black dark:text-white px-4 py-2 rounded w-full hover:bg-gray-400 dark:hover:bg-gray-700" disabled>Copy Code</button>
+    <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-[450px] text-center">
+        <h1 class="text-3xl font-bold mb-6">2FA Code Generator</h1>
+
+        <input type="text" id="secretKey" class="w-full p-3 border rounded-lg mb-4 text-center dark:bg-gray-700 dark:text-white text-lg" placeholder="Enter 2FA Key" />
+        
+        <button onclick="start2FA()" class="bg-blue-500 text-white px-5 py-3 rounded-lg w-full mb-3 hover:bg-blue-600 text-lg">Get Code</button>
+        
+        <h2 id="otpCode" class="text-4xl font-bold text-green-600 mb-2">------</h2>
+        
+        <p id="countdown" class="text-gray-600 dark:text-gray-300 mb-6 text-lg">Refreshing in: -- sec</p>
+        
+        <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 dark:bg-gray-600 text-black dark:text-white px-5 py-3 rounded-lg w-full hover:bg-gray-400 dark:hover:bg-gray-700 text-lg" disabled>Copy Code</button>
     </div>
 
     <script>
@@ -113,32 +115,6 @@
             } else {
                 alert("No OTP available to copy!");
             }
-        }
-
-        // Chuyển đổi Dark Mode
-        const darkModeToggle = document.getElementById("darkModeToggle");
-        const htmlElement = document.documentElement;
-
-        function applyDarkMode(enabled) {
-            if (enabled) {
-                htmlElement.classList.add("dark");
-                localStorage.setItem("darkMode", "enabled");
-                darkModeToggle.textContent = "☀️";
-            } else {
-                htmlElement.classList.remove("dark");
-                localStorage.setItem("darkMode", "disabled");
-                darkModeToggle.textContent = "🌙";
-            }
-        }
-
-        darkModeToggle.addEventListener("click", () => {
-            const isDarkMode = htmlElement.classList.contains("dark");
-            applyDarkMode(!isDarkMode);
-        });
-
-        // Kiểm tra chế độ đã lưu
-        if (localStorage.getItem("darkMode") === "enabled" || window.matchMedia("(prefers-color-scheme: dark)").matches) {
-            applyDarkMode(true);
         }
     </script>
 
