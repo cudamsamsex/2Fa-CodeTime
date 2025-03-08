@@ -101,12 +101,12 @@ function copyOTP() {
     const otpText = document.getElementById("otpCode").innerText.trim();
     if (otpText && otpText !== "------") {
         navigator.clipboard.writeText(otpText).then(() => {
-            showToast("OTP copied successfully!");
+            showToast("Code Copy Successfully!");
         }).catch(() => {
             showToast("Failed to copy Code!", true);
         });
     } else {
-        showToast("No OTP available to copy!", true);
+        showToast("No Code available to copy!", true);
     }
 }
 
