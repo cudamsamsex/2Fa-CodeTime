@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2FA Code Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: {} } };
+    </script>
 </head>
 <body class="bg-gray-100 flex justify-center items-center h-screen transition-colors duration-300">
 
@@ -28,7 +30,6 @@
             document.body.classList.toggle("bg-gray-900", darkMode);
             document.body.classList.toggle("text-white", darkMode);
             document.getElementById("container").classList.toggle("bg-gray-800", darkMode);
-            document.getElementById("container").classList.toggle("text-white", darkMode);
             document.getElementById("title").classList.toggle("text-white", darkMode);
             document.getElementById("countdown").classList.toggle("text-gray-400", darkMode);
             document.getElementById("secretKey").classList.toggle("bg-gray-700", darkMode);
@@ -38,6 +39,11 @@
 
         function start2FA() {
             let secret = document.getElementById("secretKey").value.trim().replace(/\s+/g, "").toUpperCase();
+
+            if (!secret) {
+                alert("Please enter a Secret Key!");
+                return;
+            }
 
             if (!/^[A-Z2-7]+$/.test(secret)) {
                 alert("Secret Key must be in Base32 format!");
@@ -96,11 +102,14 @@
             try {
                 const otp = await generateTOTP(secret);
                 document.getElementById("otpCode").innerText = otp;
+                document.getElementById("otpCode").classList.remove("text-red-500");
                 document.getElementById("copyBtn").disabled = false;
                 updateCountdown();
             } catch (error) {
-                document.getElementById("otpCode").innerText = "Error!";
+                document.getElementById("otpCode").innerText = "Invalid Key!";
+                document.getElementById("otpCode").classList.add("text-red-500");
                 document.getElementById("copyBtn").disabled = true;
+                clearInterval(interval);
             }
         }
 
