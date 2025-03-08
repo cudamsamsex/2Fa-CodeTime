@@ -1,28 +1,30 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trình tạo mã 2FA</title>
+    <title>2FA Code Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
-        input { padding: 10px; width: 300px; margin-bottom: 10px; }
-        button { padding: 10px 20px; cursor: pointer; }
+        input, button { padding: 10px; margin: 5px; }
+        input { width: 300px; }
+        button { cursor: pointer; }
         h2 { color: green; }
     </style>
 </head>
 <body>
 
-    <h1>Trình tạo mã 2FA</h1>
-    <p>Nhập Secret Key để tạo mã 2FA:</p>
+    <h1>2FA Code Generator</h1>
+    <p>Enter your Secret Key to generate a 2FA code:</p>
     
-    <input type="text" id="secretKey" placeholder="Nhập Secret Key (Base32)" />
+    <input type="text" id="secretKey" placeholder="Enter Secret Key (Base32)" />
     <br>
-    <button onclick="start2FA()">Tạo mã 2FA</button>
+    <button onclick="start2FA()">Generate 2FA Code</button>
+    <button onclick="copyOTP()">Copy OTP</button>
 
-    <h2 id="otpCode">Mã OTP: --</h2>
-    <p id="countdown">Mã cập nhật sau: -- giây</p>
+    <h2 id="otpCode">OTP Code: --</h2>
+    <p id="countdown">Code refreshes in: -- seconds</p>
 
     <script>
         let interval;
@@ -31,7 +33,7 @@
             let secret = document.getElementById("secretKey").value.trim().replace(/\s+/g, "").toUpperCase();
 
             if (!/^[A-Z2-7]+$/.test(secret)) {
-                alert("Secret Key phải ở định dạng Base32!");
+                alert("Secret Key must be in Base32 format!");
                 return;
             }
 
@@ -86,16 +88,26 @@
         async function updateOTP(secret) {
             try {
                 const otp = await generateTOTP(secret);
-                document.getElementById("otpCode").innerText = "Mã OTP: " + otp;
+                document.getElementById("otpCode").innerText = "OTP Code: " + otp;
                 updateCountdown();
             } catch (error) {
-                document.getElementById("otpCode").innerText = "Lỗi: " + error.message;
+                document.getElementById("otpCode").innerText = "Error: " + error.message;
             }
         }
 
         function updateCountdown() {
             const timeRemaining = 30 - (Math.floor(Date.now() / 1000) % 30);
-            document.getElementById("countdown").innerText = "Mã cập nhật sau: " + timeRemaining + " giây";
+            document.getElementById("countdown").innerText = "Code refreshes in: " + timeRemaining + " seconds";
+        }
+
+        function copyOTP() {
+            const otpText = document.getElementById("otpCode").innerText.replace("OTP Code: ", "").trim();
+            if (otpText && otpText !== "--") {
+                navigator.clipboard.writeText(otpText);
+                alert("OTP copied to clipboard!");
+            } else {
+                alert("No OTP available to copy!");
+            }
         }
     </script>
 
