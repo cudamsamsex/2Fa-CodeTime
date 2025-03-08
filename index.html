@@ -59,6 +59,71 @@
         if (localStorage.getItem("darkMode") === "enabled" || window.matchMedia("(prefers-color-scheme: dark)").matches) {
             applyDarkMode(true);
         }
+
+        // Hàm tạo mã OTP từ secret key
+        function generateTOTP(secret) {
+            if (!secret) return null;
+            try {
+                const key = Uint8Array.from(atob(secret.replace(/=+$/, '')), c => c.charCodeAt(0));
+                const epoch = Math.floor(Date.now() / 1000);
+                const timeStep = Math.floor(epoch / 30);
+                const timeBuffer = new Uint8Array(8);
+                for (let i = 7; i >= 0; i--) {
+                    timeBuffer[i] = timeStep & 0xff;
+                    timeStep >>= 8;
+                }
+                const hmac = new jsSHA("SHA-1", "UINT8ARRAY", { hmacKey: { value: key, format: "UINT8ARRAY" } });
+                hmac.update(timeBuffer);
+                const hmacResult = hmac.getHash("UINT8ARRAY");
+                const offset = hmacResult[hmacResult.length - 1] & 0x0f;
+                const otp = ((hmacResult[offset] & 0x7f) << 24 |
+                            (hmacResult[offset + 1] & 0xff) << 16 |
+                            (hmacResult[offset + 2] & 0xff) << 8 |
+                            (hmacResult[offset + 3] & 0xff)) % 1000000;
+                return otp.toString().padStart(6, '0');
+            } catch (error) {
+                return null;
+            }
+        }
+
+        // Cập nhật mã OTP mỗi 30 giây
+        function start2FA() {
+            const secretKey = document.getElementById("secretKey").value.trim();
+            if (!secretKey) {
+                alert("Please enter a valid 2FA secret key.");
+                return;
+            }
+            
+            function updateOTP() {
+                const otpCode = generateTOTP(secretKey);
+                if (otpCode) {
+                    document.getElementById("otpCode").textContent = otpCode;
+                    document.getElementById("copyBtn").disabled = false;
+                } else {
+                    document.getElementById("otpCode").textContent = "Invalid Key";
+                    document.getElementById("copyBtn").disabled = true;
+                }
+
+                const secondsLeft = 30 - (Math.floor(Date.now() / 1000) % 30);
+                document.getElementById("countdown").textContent = `Refreshing in: ${secondsLeft} sec`;
+
+                setTimeout(updateOTP, secondsLeft * 1000);
+            }
+
+            updateOTP();
+        }
+
+        // Hàm sao chép mã OTP
+        function copyOTP() {
+            const otpText = document.getElementById("otpCode").textContent;
+            if (otpText && otpText !== "------") {
+                navigator.clipboard.writeText(otpText).then(() => {
+                    alert("OTP copied to clipboard!");
+                }).catch(() => {
+                    alert("Failed to copy OTP.");
+                });
+            }
+        }
     </script>
 
 </body>
