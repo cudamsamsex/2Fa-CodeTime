@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light"> 
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,6 +27,94 @@
     </div>
 
     <script>
+        let interval;
+
+        function start2FA() {
+            let secret = document.getElementById("secretKey").value.trim().replace(/\s+/g, "").toUpperCase();
+
+            if (!/^[A-Z2-7]+$/.test(secret)) {
+                alert("Secret Key must be in Base32 format!");
+                return;
+            }
+
+            if (interval) clearInterval(interval);
+
+            updateOTP(secret);
+            interval = setInterval(() => updateOTP(secret), 1000);
+        }
+
+        function base32ToBytes(base32) {
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+            let bits = "", bytes = [];
+
+            for (let char of base32) {
+                let val = alphabet.indexOf(char);
+                bits += val.toString(2).padStart(5, "0");
+            }
+
+            for (let i = 0; i + 8 <= bits.length; i += 8) {
+                bytes.push(parseInt(bits.substring(i, i + 8), 2));
+            }
+
+            return new Uint8Array(bytes);
+        }
+
+        async function generateTOTP(secret) {
+            let keyBytes = base32ToBytes(secret);
+            let epoch = Math.floor(Date.now() / 1000);
+            let time = Math.floor(epoch / 30);
+            let timeBuffer = new ArrayBuffer(8);
+            let timeView = new DataView(timeBuffer);
+
+            for (let i = 7; i >= 0; i--) {
+                timeView.setUint8(i, time & 0xff);
+                time >>= 8;
+            }
+
+            let cryptoKey = await window.crypto.subtle.importKey(
+                "raw", keyBytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]
+            );
+
+            let hmac = new Uint8Array(await window.crypto.subtle.sign("HMAC", cryptoKey, timeBuffer));
+            let offset = hmac[hmac.length - 1] & 0x0f;
+            let otp = ((hmac[offset] & 0x7f) << 24 |
+                       (hmac[offset + 1] & 0xff) << 16 |
+                       (hmac[offset + 2] & 0xff) << 8 |
+                       (hmac[offset + 3] & 0xff)) % 1000000;
+
+            return otp.toString().padStart(6, "0");
+        }
+
+        async function updateOTP(secret) {
+            try {
+                const otp = await generateTOTP(secret);
+                document.getElementById("otpCode").innerText = otp;
+                document.getElementById("copyBtn").disabled = false;
+                updateCountdown();
+            } catch (error) {
+                document.getElementById("otpCode").innerText = "Error!";
+                document.getElementById("copyBtn").disabled = true;
+            }
+        }
+
+        function updateCountdown() {
+            const timeRemaining = 30 - (Math.floor(Date.now() / 1000) % 30);
+            document.getElementById("countdown").innerText = "Refreshing in: " + timeRemaining + " sec";
+        }
+
+        function copyOTP() {
+            const otpText = document.getElementById("otpCode").innerText.trim();
+            if (otpText && otpText !== "------") {
+                navigator.clipboard.writeText(otpText).then(() => {
+                    alert("OTP copied to clipboard!");
+                }).catch(() => {
+                    alert("Failed to Copy Code!");
+                });
+            } else {
+                alert("No OTP available to copy!");
+            }
+        }
+
         // Chuyển đổi Dark Mode
         const darkModeToggle = document.getElementById("darkModeToggle");
         const htmlElement = document.documentElement;
@@ -34,12 +122,10 @@
         function applyDarkMode(enabled) {
             if (enabled) {
                 htmlElement.classList.add("dark");
-                htmlElement.setAttribute("data-theme", "dark");
                 localStorage.setItem("darkMode", "enabled");
                 darkModeToggle.textContent = "☀️";
             } else {
                 htmlElement.classList.remove("dark");
-                htmlElement.setAttribute("data-theme", "light");
                 localStorage.setItem("darkMode", "disabled");
                 darkModeToggle.textContent = "🌙";
             }
