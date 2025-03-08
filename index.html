@@ -28,7 +28,6 @@
         document.getElementById("darkModeToggle").addEventListener("click", () => {
             darkMode = !darkMode;
             document.body.classList.toggle("bg-gray-900", darkMode);
-            document.body.classList.toggle("text-white", darkMode);
             document.getElementById("container").classList.toggle("bg-gray-800", darkMode);
             document.getElementById("title").classList.toggle("text-white", darkMode);
             document.getElementById("countdown").classList.toggle("text-gray-400", darkMode);
@@ -62,6 +61,7 @@
 
             for (let char of base32) {
                 let val = alphabet.indexOf(char);
+                if (val === -1) return null;
                 bits += val.toString(2).padStart(5, "0");
             }
 
@@ -74,6 +74,8 @@
 
         async function generateTOTP(secret) {
             let keyBytes = base32ToBytes(secret);
+            if (!keyBytes) throw new Error("Invalid Base32 encoding");
+
             let epoch = Math.floor(Date.now() / 1000);
             let time = Math.floor(epoch / 30);
             let timeBuffer = new ArrayBuffer(8);
