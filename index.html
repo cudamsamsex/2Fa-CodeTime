@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trình tạo mã 2FA</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsotp/dist/jsOTP.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        input { padding: 10px; width: 300px; margin-bottom: 10px; }
+        button { padding: 10px 20px; cursor: pointer; }
+        h2 { color: green; }
+    </style>
+</head>
+<body>
+
+    <h1>Trình tạo mã 2FA</h1>
+    <p>Nhập Secret Key để tạo mã 2FA:</p>
+    
+    <input type="text" id="secretKey" placeholder="Nhập Secret Key (Base32)" />
+    <br>
+    <button onclick="generate2FA()">Tạo mã 2FA</button>
+
+    <h2 id="otpCode">Mã OTP: --</h2>
+
+    <script>
+        function generate2FA() {
+            var secret = document.getElementById("secretKey").value.trim();
+            if (!secret) {
+                alert("Vui lòng nhập Secret Key!");
+                return;
+            }
+
+            var totp = new jsOTP.totp();
+            var otp = totp.getOtp(secret);
+            document.getElementById("otpCode").innerText = "Mã OTP: " + otp;
+        }
+    </script>
+
+</body>
+</html>
