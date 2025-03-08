@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trình tạo mã 2FA</title>
-    <script src="https://cdn.jsdelivr.net/npm/otplib"></script>
+    <script src="https://cdn.jsdelivr.net/npm/otplib@12.0.1"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
         input { padding: 10px; width: 300px; margin-bottom: 10px; }
@@ -19,13 +19,13 @@
     
     <input type="text" id="secretKey" placeholder="Nhập Secret Key (Base32)" />
     <br>
-    <button onclick="generate2FA()">Tạo mã 2FA</button>
+    <button onclick="start2FA()">Tạo mã 2FA</button>
 
     <h2 id="otpCode">Mã OTP: --</h2>
-    <p id="countdown"></p>
+    <p id="countdown">Mã cập nhật sau: -- giây</p>
 
     <script>
-        function generate2FA() {
+        function start2FA() {
             const secret = document.getElementById("secretKey").value.trim();
             if (!secret) {
                 alert("Vui lòng nhập Secret Key!");
@@ -33,18 +33,27 @@
             }
 
             try {
-                const otp = otplib.authenticator.generate(secret);
-                document.getElementById("otpCode").innerText = "Mã OTP: " + otp;
-                updateCountdown();
+                otplib.authenticator.options = { step: 30 }; // Đảm bảo chuẩn RFC 6238
+                updateOTP(secret);
+                setInterval(() => updateOTP(secret), 1000);
             } catch (error) {
                 alert("Lỗi: Secret Key không hợp lệ!");
             }
         }
 
+        function updateOTP(secret) {
+            try {
+                const otp = otplib.authenticator.generate(secret);
+                document.getElementById("otpCode").innerText = "Mã OTP: " + otp;
+                updateCountdown();
+            } catch (error) {
+                document.getElementById("otpCode").innerText = "Lỗi: Secret Key không hợp lệ!";
+            }
+        }
+
         function updateCountdown() {
             const timeRemaining = 30 - (Math.floor(Date.now() / 1000) % 30);
-            document.getElementById("countdown").innerText = "Mã sẽ cập nhật sau: " + timeRemaining + " giây";
-            setTimeout(updateCountdown, 1000);
+            document.getElementById("countdown").innerText = "Mã cập nhật sau: " + timeRemaining + " giây";
         }
     </script>
 
