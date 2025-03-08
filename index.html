@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trình tạo mã 2FA</title>
-    <script src="https://cdn.jsdelivr.net/npm/jsotp/dist/jsOTP.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/otplib"></script>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
         input { padding: 10px; width: 300px; margin-bottom: 10px; }
@@ -22,18 +22,29 @@
     <button onclick="generate2FA()">Tạo mã 2FA</button>
 
     <h2 id="otpCode">Mã OTP: --</h2>
+    <p id="countdown"></p>
 
     <script>
         function generate2FA() {
-            var secret = document.getElementById("secretKey").value.trim();
+            const secret = document.getElementById("secretKey").value.trim();
             if (!secret) {
                 alert("Vui lòng nhập Secret Key!");
                 return;
             }
 
-            var totp = new jsOTP.totp();
-            var otp = totp.getOtp(secret);
-            document.getElementById("otpCode").innerText = "Mã OTP: " + otp;
+            try {
+                const otp = otplib.authenticator.generate(secret);
+                document.getElementById("otpCode").innerText = "Mã OTP: " + otp;
+                updateCountdown();
+            } catch (error) {
+                alert("Lỗi: Secret Key không hợp lệ!");
+            }
+        }
+
+        function updateCountdown() {
+            const timeRemaining = 30 - (Math.floor(Date.now() / 1000) % 30);
+            document.getElementById("countdown").innerText = "Mã sẽ cập nhật sau: " + timeRemaining + " giây";
+            setTimeout(updateCountdown, 1000);
         }
     </script>
 
