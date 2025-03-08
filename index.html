@@ -25,6 +25,8 @@
     <p id="countdown">Mã cập nhật sau: -- giây</p>
 
     <script>
+        let interval; // Lưu trạng thái interval để tránh lặp nhiều lần
+        
         function start2FA() {
             let secret = document.getElementById("secretKey").value.trim();
             if (!secret) {
@@ -33,10 +35,16 @@
             }
 
             try {
-                secret = otplib.authenticator.utils.encodeKey(secret); // Chuẩn hóa key
                 otplib.authenticator.options = { step: 30 };
+
+                // Xóa interval cũ nếu có
+                if (interval) clearInterval(interval);
+
+                // Cập nhật mã lần đầu
                 updateOTP(secret);
-                setInterval(() => updateOTP(secret), 1000);
+
+                // Cập nhật mỗi giây
+                interval = setInterval(() => updateOTP(secret), 1000);
             } catch (error) {
                 alert("Lỗi: Secret Key không hợp lệ!");
             }
