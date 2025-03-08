@@ -28,27 +28,19 @@
     </div>
 
     <script>
-         let interval;
-    let darkMode = localStorage.getItem("darkMode") === "enabled";
+        let interval;
+        let darkMode = false;
 
-    function applyDarkMode(enabled) {
-        document.body.classList.toggle("bg-gray-900", enabled);
-        document.getElementById("container").classList.toggle("bg-gray-800", enabled);
-        document.getElementById("title").classList.toggle("text-white", enabled);
-        document.getElementById("countdown").classList.toggle("text-gray-400", enabled);
-        document.getElementById("secretKey").classList.toggle("bg-gray-700", enabled);
-        document.getElementById("secretKey").classList.toggle("text-white", enabled);
-        document.getElementById("darkModeToggle").innerText = enabled ? "☀️" : "🌙";
-    }
-
-    // Áp dụng trạng thái khi tải trang
-    applyDarkMode(darkMode);
-
-    document.getElementById("darkModeToggle").addEventListener("click", () => {
-        darkMode = !darkMode;
-        localStorage.setItem("darkMode", darkMode ? "enabled" : "disabled");
-        applyDarkMode(darkMode);
-    });
+        document.getElementById("darkModeToggle").addEventListener("click", () => {
+            darkMode = !darkMode;
+            document.body.classList.toggle("bg-gray-900", darkMode);
+            document.getElementById("container").classList.toggle("bg-gray-800", darkMode);
+            document.getElementById("title").classList.toggle("text-white", darkMode);
+            document.getElementById("countdown").classList.toggle("text-gray-400", darkMode);
+            document.getElementById("secretKey").classList.toggle("bg-gray-700", darkMode);
+            document.getElementById("secretKey").classList.toggle("text-white", darkMode);
+            document.getElementById("darkModeToggle").innerText = darkMode ? "☀️" : "🌙";
+        });
 
         document.getElementById("secretKey").addEventListener("input", () => {
             let secret = document.getElementById("secretKey").value.trim().replace(/\s+/g, "").toUpperCase();
