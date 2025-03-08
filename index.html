@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2FA Code Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/otpauth"></script> 
     <script>
         tailwind.config = {
             darkMode: "class"
@@ -15,89 +15,49 @@
 <body class="bg-gray-100 text-gray-900 flex justify-center items-center h-screen transition-colors dark:bg-gray-900 dark:text-white">
 
     <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[450px] text-center relative">
+        <!-- Biểu tượng Dark Mode di chuyển lên góc phải -->
         <button id="darkModeToggle" class="absolute top-4 right-4 text-gray-600 dark:text-gray-300 text-2xl">🌙</button>
 
-        <h1 class="text-4xl font-bold mb-6">2FA Code Generator</h1>
+        <!-- Tiêu đề được căn giữa và to hơn -->
+        <h1 class="text-3xl font-bold mb-6">2FA Code Generator</h1>
 
-        <input type="text" id="secretKey" class="w-full p-3 border rounded mb-4 text-center dark:bg-gray-700 dark:text-white text-lg" placeholder="Enter 2FA Key (Base32)" />
+        <input type="text" id="secretKey" class="w-full p-3 border rounded mb-4 text-center dark:bg-gray-700 dark:text-white text-lg" placeholder="Enter 2FA Key" />
         <button onclick="start2FA()" class="bg-blue-500 text-white px-4 py-3 rounded w-full mb-3 text-lg hover:bg-blue-600">Get Code</button>
         
-        <h2 id="otpCode" class="text-5xl font-bold text-green-600 mb-3">------</h2>
+        <!-- Mã OTP lớn hơn -->
+        <h2 id="otpCode" class="text-4xl font-bold text-green-600 mb-3">------</h2>
         <p id="countdown" class="text-gray-600 dark:text-gray-300 mb-4 text-lg">Refreshing in: -- sec</p>
         
         <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 dark:bg-gray-600 text-black dark:text-white px-4 py-3 rounded w-full text-lg hover:bg-gray-400 dark:hover:bg-gray-700" disabled>Copy Code</button>
     </div>
 
     <script>
-        // Dark Mode Toggle
+        // Chuyển đổi Dark Mode
         const darkModeToggle = document.getElementById("darkModeToggle");
         const htmlElement = document.documentElement;
 
         function applyDarkMode(enabled) {
             if (enabled) {
                 htmlElement.classList.add("dark");
+                htmlElement.setAttribute("data-theme", "dark");
                 localStorage.setItem("darkMode", "enabled");
                 darkModeToggle.textContent = "☀️";
             } else {
                 htmlElement.classList.remove("dark");
+                htmlElement.setAttribute("data-theme", "light");
                 localStorage.setItem("darkMode", "disabled");
                 darkModeToggle.textContent = "🌙";
             }
         }
 
         darkModeToggle.addEventListener("click", () => {
-            applyDarkMode(!htmlElement.classList.contains("dark"));
+            const isDarkMode = htmlElement.classList.contains("dark");
+            applyDarkMode(!isDarkMode);
         });
 
-        if (localStorage.getItem("darkMode") === "enabled") {
+        // Kiểm tra chế độ đã lưu
+        if (localStorage.getItem("darkMode") === "enabled" || window.matchMedia("(prefers-color-scheme: dark)").matches) {
             applyDarkMode(true);
-        }
-
-        // Generate OTP using OTPAuth library
-        function start2FA() {
-            const secretKey = document.getElementById("secretKey").value.trim();
-            if (!secretKey) {
-                alert("Please enter a valid 2FA secret key.");
-                return;
-            }
-
-            try {
-                const totp = new OTPAuth.TOTP({
-                    algorithm: "SHA1",
-                    digits: 6,
-                    period: 30,
-                    secret: OTPAuth.Secret.fromBase32(secretKey)
-                });
-
-                function updateOTP() {
-                    const otpCode = totp.generate();
-                    document.getElementById("otpCode").textContent = otpCode;
-                    document.getElementById("copyBtn").disabled = false;
-
-                    const secondsLeft = 30 - (Math.floor(Date.now() / 1000) % 30);
-                    document.getElementById("countdown").textContent = `Refreshing in: ${secondsLeft} sec`;
-
-                    setTimeout(updateOTP, secondsLeft * 1000);
-                }
-
-                updateOTP();
-            } catch (error) {
-                alert("Invalid secret key format! Make sure it's in Base32.");
-                document.getElementById("otpCode").textContent = "Invalid Key";
-                document.getElementById("copyBtn").disabled = true;
-            }
-        }
-
-        // Copy OTP to clipboard
-        function copyOTP() {
-            const otpText = document.getElementById("otpCode").textContent;
-            if (otpText !== "------") {
-                navigator.clipboard.writeText(otpText).then(() => {
-                    alert("OTP copied to clipboard!");
-                }).catch(() => {
-                    alert("Failed to copy OTP.");
-                });
-            }
         }
     </script>
 
