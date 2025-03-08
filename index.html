@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2FA Code Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: {} } };
+    </script>
 </head>
 <body class="bg-gray-100 flex justify-center items-center h-screen transition-colors duration-300">
 
@@ -13,7 +15,6 @@
         <button id="darkModeToggle" class="absolute top-2 right-2 bg-gray-200 text-black px-3 py-1 rounded hover:bg-gray-300">🌙</button>
         <h1 id="title" class="text-3xl font-bold text-gray-800 mb-4 transition-colors duration-300">2FA Code Generator</h1>
         <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center text-gray-800 bg-white transition-colors duration-300" placeholder="Enter Secret Key (Base32)" />
-        <button onclick="start2FA()" class="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2 hover:bg-blue-600">Generate OTP</button>
         <h2 id="otpCode" class="text-3xl font-bold text-green-600 mb-2">------</h2>
         <p id="countdown" class="text-gray-600 mb-4 transition-colors duration-300">Refreshing in: -- sec</p>
         <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 text-black px-4 py-2 rounded w-full hover:bg-gray-400" disabled>Copy OTP</button>
@@ -26,9 +27,7 @@
         document.getElementById("darkModeToggle").addEventListener("click", () => {
             darkMode = !darkMode;
             document.body.classList.toggle("bg-gray-900", darkMode);
-            document.body.classList.toggle("text-white", darkMode);
             document.getElementById("container").classList.toggle("bg-gray-800", darkMode);
-            document.getElementById("container").classList.toggle("text-white", darkMode);
             document.getElementById("title").classList.toggle("text-white", darkMode);
             document.getElementById("countdown").classList.toggle("text-gray-400", darkMode);
             document.getElementById("secretKey").classList.toggle("bg-gray-700", darkMode);
@@ -36,33 +35,24 @@
             document.getElementById("darkModeToggle").innerText = darkMode ? "☀️" : "🌙";
         });
 
-        function start2FA() {
+        document.getElementById("secretKey").addEventListener("input", () => {
             let secret = document.getElementById("secretKey").value.trim().replace(/\s+/g, "").toUpperCase();
-
-            if (!/^[A-Z2-7]+$/.test(secret)) {
-                alert("Secret Key must be in Base32 format!");
-                return;
-            }
-
             if (interval) clearInterval(interval);
-
             updateOTP(secret);
             interval = setInterval(() => updateOTP(secret), 1000);
-        }
+        });
 
         function base32ToBytes(base32) {
             const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
             let bits = "", bytes = [];
-
             for (let char of base32) {
                 let val = alphabet.indexOf(char);
+                if (val === -1) continue;
                 bits += val.toString(2).padStart(5, "0");
             }
-
             for (let i = 0; i + 8 <= bits.length; i += 8) {
                 bytes.push(parseInt(bits.substring(i, i + 8), 2));
             }
-
             return new Uint8Array(bytes);
         }
 
@@ -72,23 +62,17 @@
             let time = Math.floor(epoch / 30);
             let timeBuffer = new ArrayBuffer(8);
             let timeView = new DataView(timeBuffer);
-
             for (let i = 7; i >= 0; i--) {
                 timeView.setUint8(i, time & 0xff);
                 time >>= 8;
             }
-
-            let cryptoKey = await window.crypto.subtle.importKey(
-                "raw", keyBytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]
-            );
-
+            let cryptoKey = await window.crypto.subtle.importKey("raw", keyBytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]);
             let hmac = new Uint8Array(await window.crypto.subtle.sign("HMAC", cryptoKey, timeBuffer));
             let offset = hmac[hmac.length - 1] & 0x0f;
             let otp = ((hmac[offset] & 0x7f) << 24 |
                        (hmac[offset + 1] & 0xff) << 16 |
                        (hmac[offset + 2] & 0xff) << 8 |
                        (hmac[offset + 3] & 0xff)) % 1000000;
-
             return otp.toString().padStart(6, "0");
         }
 
@@ -96,11 +80,13 @@
             try {
                 const otp = await generateTOTP(secret);
                 document.getElementById("otpCode").innerText = otp;
+                document.getElementById("otpCode").classList.remove("text-red-500");
                 document.getElementById("copyBtn").disabled = false;
                 updateCountdown();
             } catch (error) {
-                document.getElementById("otpCode").innerText = "Error!";
+                document.getElementById("otpCode").innerText = "------";
                 document.getElementById("copyBtn").disabled = true;
+                clearInterval(interval);
             }
         }
 
