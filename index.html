@@ -40,19 +40,23 @@
             interval = setInterval(() => updateOTP(secret), 1000);
         }
 
-        function updateOTP(secret) {
-            try {
-                const otp = speakeasy.totp({
-                    secret: secret,
-                    encoding: "base32"
-                });
-
-                document.getElementById("otpCode").innerText = "Mã OTP: " + otp;
-                updateCountdown();
-            } catch (error) {
-                document.getElementById("otpCode").innerText = "Lỗi: Secret Key không hợp lệ!";
-            }
+       function updateOTP(secret) {
+    try {
+        if (!/^[A-Z2-7]+$/.test(secret.replace(/\s/g, '').toUpperCase())) {
+            throw new Error("Secret Key phải ở định dạng Base32!");
         }
+
+        const otp = speakeasy.totp({
+            secret: secret.replace(/\s/g, '').toUpperCase(), // Chuẩn hóa Secret Key
+            encoding: "base32"
+        });
+
+        document.getElementById("otpCode").innerText = "Mã OTP: " + otp;
+        updateCountdown();
+    } catch (error) {
+        document.getElementById("otpCode").innerText = "Lỗi: " + error.message;
+    }
+}
 
         function updateCountdown() {
             const timeRemaining = 30 - (Math.floor(Date.now() / 1000) % 30);
