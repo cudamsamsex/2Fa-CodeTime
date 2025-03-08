@@ -111,22 +111,37 @@ function copyOTP() {
 }
 
 function showToast(message, isError = false) {
+    let toastContainer = document.getElementById("toastContainer");
+
+    // Nếu chưa có container, tạo mới
+    if (!toastContainer) {
+        toastContainer = document.createElement("div");
+        toastContainer.id = "toastContainer";
+        toastContainer.style.position = "fixed";
+        toastContainer.style.top = "20px";
+        toastContainer.style.right = "20px";
+        toastContainer.style.display = "flex";
+        toastContainer.style.flexDirection = "column";
+        toastContainer.style.gap = "10px"; // Khoảng cách giữa các thông báo
+        toastContainer.style.zIndex = "1000";
+        document.body.appendChild(toastContainer);
+    }
+
     const toast = document.createElement("div");
     toast.innerText = message;
-    toast.style.position = "fixed";
-    toast.style.top = "20px"; // Đưa thông báo lên góc trên
-    toast.style.right = "20px"; // Căn phải
     toast.style.backgroundColor = isError ? "#e53e3e" : "#48bb78"; // Đỏ nếu lỗi, xanh nếu thành công
     toast.style.color = "#fff";
     toast.style.padding = "10px 20px";
     toast.style.borderRadius = "5px";
     toast.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.1)";
     toast.style.fontSize = "16px";
-    toast.style.zIndex = "1000";
     toast.style.opacity = "1";
     toast.style.transition = "opacity 0.5s ease-in-out";
+    toast.style.maxWidth = "300px"; // Giới hạn chiều rộng
+    toast.style.wordBreak = "break-word"; // Xuống dòng khi quá dài
 
-    document.body.appendChild(toast);
+    // Thêm toast vào container (đẩy cái mới lên trên)
+    toastContainer.prepend(toast);
 
     setTimeout(() => {
         toast.style.opacity = "0"; // Làm mờ dần
