@@ -15,7 +15,7 @@
         <button onclick="start2FA()" class="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2 hover:bg-blue-600">Get Code</button>
         <h2 id="otpCode" class="text-3xl font-bold text-green-600 mb-2">------</h2>
         <p id="countdown" class="text-gray-600 mb-4">Refreshing in: -- sec</p>
-        <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 text-black px-4 py-2 rounded w-full hover:bg-gray-400" disabled>Copy OTP</button>
+        <button id="copyBtn" onclick="copyOTP()" class="bg-gray-300 text-black px-4 py-2 rounded w-full hover:bg-gray-400" disabled>Copy Code</button>
     </div>
 
     <script>
@@ -100,7 +100,7 @@
                 navigator.clipboard.writeText(otpText).then(() => {
                     alert("OTP copied to clipboard!");
                 }).catch(() => {
-                    alert("Failed to copy OTP!");
+                    alert("Failed to Copy Code!");
                 });
             } else {
                 alert("No OTP available to copy!");
