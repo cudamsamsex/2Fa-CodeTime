@@ -1,17 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light"> 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2FA Code Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class"
+        };
+    </script>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 flex justify-center items-center h-screen transition-colors">
+<body class="bg-gray-100 text-gray-900 flex justify-center items-center h-screen transition-colors dark:bg-gray-900 dark:text-white">
 
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-96 text-center">
         <div class="flex justify-between items-center mb-4">
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">2FA Code Generator</h1>
+            <h1 class="text-2xl font-bold">2FA Code Generator</h1>
             <button id="darkModeToggle" class="text-gray-600 dark:text-gray-300">🌙</button>
         </div>
         <input type="text" id="secretKey" class="w-full p-2 border rounded mb-4 text-center dark:bg-gray-700 dark:text-white" placeholder="Enter 2FA Key" />
@@ -22,116 +27,30 @@
     </div>
 
     <script>
-        let interval;
-
-        function start2FA() {
-            let secret = document.getElementById("secretKey").value.trim().replace(/\s+/g, "").toUpperCase();
-
-            if (!/^[A-Z2-7]+$/.test(secret)) {
-                alert("Secret Key must be in Base32 format!");
-                return;
-            }
-
-            if (interval) clearInterval(interval);
-
-            updateOTP(secret);
-            interval = setInterval(() => updateOTP(secret), 1000);
-        }
-
-        function base32ToBytes(base32) {
-            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-            let bits = "", bytes = [];
-
-            for (let char of base32) {
-                let val = alphabet.indexOf(char);
-                bits += val.toString(2).padStart(5, "0");
-            }
-
-            for (let i = 0; i + 8 <= bits.length; i += 8) {
-                bytes.push(parseInt(bits.substring(i, i + 8), 2));
-            }
-
-            return new Uint8Array(bytes);
-        }
-
-        async function generateTOTP(secret) {
-            let keyBytes = base32ToBytes(secret);
-            let epoch = Math.floor(Date.now() / 1000);
-            let time = Math.floor(epoch / 30);
-            let timeBuffer = new ArrayBuffer(8);
-            let timeView = new DataView(timeBuffer);
-
-            for (let i = 7; i >= 0; i--) {
-                timeView.setUint8(i, time & 0xff);
-                time >>= 8;
-            }
-
-            let cryptoKey = await window.crypto.subtle.importKey(
-                "raw", keyBytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]
-            );
-
-            let hmac = new Uint8Array(await window.crypto.subtle.sign("HMAC", cryptoKey, timeBuffer));
-            let offset = hmac[hmac.length - 1] & 0x0f;
-            let otp = ((hmac[offset] & 0x7f) << 24 |
-                       (hmac[offset + 1] & 0xff) << 16 |
-                       (hmac[offset + 2] & 0xff) << 8 |
-                       (hmac[offset + 3] & 0xff)) % 1000000;
-
-            return otp.toString().padStart(6, "0");
-        }
-
-        async function updateOTP(secret) {
-            try {
-                const otp = await generateTOTP(secret);
-                document.getElementById("otpCode").innerText = otp;
-                document.getElementById("copyBtn").disabled = false;
-                updateCountdown();
-            } catch (error) {
-                document.getElementById("otpCode").innerText = "Error!";
-                document.getElementById("copyBtn").disabled = true;
-            }
-        }
-
-        function updateCountdown() {
-            const timeRemaining = 30 - (Math.floor(Date.now() / 1000) % 30);
-            document.getElementById("countdown").innerText = "Refreshing in: " + timeRemaining + " sec";
-        }
-
-        function copyOTP() {
-            const otpText = document.getElementById("otpCode").innerText.trim();
-            if (otpText && otpText !== "------") {
-                navigator.clipboard.writeText(otpText).then(() => {
-                    alert("OTP copied to clipboard!");
-                }).catch(() => {
-                    alert("Failed to Copy Code!");
-                });
-            } else {
-                alert("No OTP available to copy!");
-            }
-        }
-
-        // Dark Mode Toggle
+        // Chuyển đổi Dark Mode
         const darkModeToggle = document.getElementById("darkModeToggle");
-        const body = document.body;
+        const htmlElement = document.documentElement;
 
         function applyDarkMode(enabled) {
             if (enabled) {
-                body.classList.add("dark");
+                htmlElement.classList.add("dark");
+                htmlElement.setAttribute("data-theme", "dark");
                 localStorage.setItem("darkMode", "enabled");
                 darkModeToggle.textContent = "☀️";
             } else {
-                body.classList.remove("dark");
+                htmlElement.classList.remove("dark");
+                htmlElement.setAttribute("data-theme", "light");
                 localStorage.setItem("darkMode", "disabled");
                 darkModeToggle.textContent = "🌙";
             }
         }
 
         darkModeToggle.addEventListener("click", () => {
-            const isDarkMode = body.classList.contains("dark");
+            const isDarkMode = htmlElement.classList.contains("dark");
             applyDarkMode(!isDarkMode);
         });
 
-        // Check user preference
+        // Kiểm tra chế độ đã lưu
         if (localStorage.getItem("darkMode") === "enabled" || window.matchMedia("(prefers-color-scheme: dark)").matches) {
             applyDarkMode(true);
         }
