@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Netflix Account Share</title>
-        <!-- Thêm favicon -->
-        <link rel="icon" href="favicon.ico" type="image/x-icon">
-        <style>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Netflix Account Share</title>
+<!-- Thêm favicon -->
+<link href="favicon.ico" rel="icon" type="image/x-icon"/>
+<style>
         /* Your existing styles */
         body {
             font-family: 'Roboto', sans-serif;
@@ -159,59 +160,56 @@
     </style>
 </head>
 <body>
-    <!-- Khung đăng nhập -->
-    <div class="login-container" id="login-box">
-        <img src="https://i.pinimg.com/originals/d2/a8/47/d2a84760f77dfe1ab7903615f4523a71.gif" alt="User Avatar" class="user-image"> <!-- Ảnh người dùng -->
-        <h2>Login Account:</h2>
-        <input type="text" id="key" placeholder="Enter Key"><br>
-        <button onclick="login()">Login</button>
-        <p id="error" style="color: red; display: none;">Incorrect key!</p>
-    </div>
-    
-    <!-- Nội dung Netflix Account Share, sẽ ẩn cho đến khi đăng nhập -->
-    <div class="content-container hidden" id="content-box">
-        <h2>Netflix Account Share</h2>
-        <table>
-            <tr>
-                <th>Account</th>
-                <th>Password</th>
-            </tr>
-            <tr>
-                <td>lifexyz2468@gmail.com <button class="copy-btn" onclick="copyText('lifexyz2468@gmail.com')">📋</button></td>
-                <td>25542409 <button class="copy-btn" onclick="copyText('25542409')">📋</button></td>
-            </tr>
-            <tr>
-                <th>Profile</th>
-                <th>PIN</th>
-            </tr>
-            <tr>
-                <td>Profile 1</td>
-                <td>1111 <button class="copy-btn" onclick="copyText('1111')">📋</button></td>
-            </tr>
-            <tr>
-                <td>Profile 2</td>
-                <td>0202 <button class="copy-btn" onclick="copyText('0202')">📋</button></td>
-            </tr>
-            <tr>
-                <td>Profile 3</td>
-                <td>1357 <button class="copy-btn" onclick="copyText('1357')">📋</button></td>
-            </tr>
-            <tr>
-                <td>Profile 4</td>
-                <td>4488 <button class="copy-btn" onclick="copyText('4488')">📋</button></td>
-            </tr>
-            <tr>
-                <td>Profile 5</td>
-                <td>0055 <button class="copy-btn" onclick="copyText('0055')">📋</button></td>
-            </tr>
-        </table>
-        <button class="logout-button" onclick="logout()">Logout</button>
-    </div>
-    
-    <!-- Toast thông báo -->
-    <div class="toast-container" id="toast-container"></div>
-
-    <script>
+<!-- Khung đăng nhập -->
+<div class="login-container" id="login-box">
+<img alt="User Avatar" class="user-image" src="https://i.pinimg.com/originals/d2/a8/47/d2a84760f77dfe1ab7903615f4523a71.gif"/> <!-- Ảnh người dùng -->
+<h2>Login Account:</h2>
+<input id="key" placeholder="Enter Key" type="text"/><br/>
+<button onclick="login()">Login</button>
+<p id="error" style="color: red; display: none;">Incorrect key!</p>
+</div>
+<!-- Nội dung Netflix Account Share, sẽ ẩn cho đến khi đăng nhập -->
+<div class="content-container hidden" id="content-box">
+<h2>Netflix Account Share</h2>
+<table>
+<tr>
+<th>Account</th>
+<th>Password</th>
+</tr>
+<tr>
+<td>lifexyz2468@gmail.com <button class="copy-btn" onclick="copyText('lifexyz2468@gmail.com')">📋</button></td>
+<td>25542409 <button class="copy-btn" onclick="copyText('25542409')">📋</button></td>
+</tr>
+<tr>
+<th>Profile</th>
+<th>PIN</th>
+</tr>
+<tr>
+<td>Profile 1</td>
+<td>1111 <button class="copy-btn" onclick="copyText('1111')">📋</button></td>
+</tr>
+<tr>
+<td>Profile 2</td>
+<td>0202 <button class="copy-btn" onclick="copyText('0202')">📋</button></td>
+</tr>
+<tr>
+<td>Profile 3</td>
+<td>1357 <button class="copy-btn" onclick="copyText('1357')">📋</button></td>
+</tr>
+<tr>
+<td>Profile 4</td>
+<td>4488 <button class="copy-btn" onclick="copyText('4488')">📋</button></td>
+</tr>
+<tr>
+<td>Profile 5</td>
+<td>0055 <button class="copy-btn" onclick="copyText('0055')">📋</button></td>
+</tr>
+</table>
+<button class="logout-button" onclick="logout()">Logout</button>
+</div>
+<!-- Toast thông báo -->
+<div class="toast-container" id="toast-container"></div>
+<script>
         // Đảm bảo ẩn content khi chưa đăng nhập
         document.addEventListener("DOMContentLoaded", function() {
             if (localStorage.getItem('loggedIn') !== 'true') {
